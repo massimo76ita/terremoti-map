@@ -1,172 +1,120 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mappa Terremoti</title>
-    <link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet" />
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        #terremoti-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-        #legend {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(255,255,255,0.9);
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-        .legend-title {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-        }
-        .legend-item {
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-        }
-        .legend-color {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-        .legend-text {
-            font-size: 12px;
-        }
-        .marker {
-            border: 2px solid white;
-            border-radius: 50%;
-            box-shadow: 0 0 5px rgba(0,0,0,0.3);
-        }
-        #loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(255,255,255,0.9);
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            z-index: 2000;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-    <div id="terremoti-container">
-        <div id="map"></div>
-        <div id="legend">
-            <h3 class="legend-title">Legenda Magnitudo</h3>
-            <div class="legend-item">
-                <span class="legend-color" style="background-color: #4CAF50;"></span>
-                <span class="legend-text">0-2</span>
+<?php
+/*
+Template Name: Mappa Terremoti
+*/
+
+// Disabilita temporaneamente gli script di terze parti
+remove_action('wp_head', 'wp_enqueue_scripts', 1);
+remove_action('wp_head', 'print_emoji_detection_script', 7);
+remove_action('wp_print_styles', 'print_emoji_styles');
+
+get_header();
+?>
+
+<div class="terremoti-page">
+    <div id="terremoti-container" style="width: 100%; height: 500px; position: relative;">
+        <div id="map" style="width: 100%; height: 100%;"></div>
+        <div id="legend" style="position: absolute; top: 10px; left: 10px; background-color: rgba(255,255,255,0.9); padding: 10px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.1); z-index: 1000;">
+            <h3 class="legend-title" style="margin: 0 0 10px 0; font-size: 14px;">Legenda Magnitudo</h3>
+            <div class="legend-item" style="margin-bottom: 5px; display: flex; align-items: center;">
+                <span class="legend-color" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; background-color: #4CAF50;"></span>
+                <span class="legend-text" style="font-size: 12px;">0-2</span>
             </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background-color: #2196F3;"></span>
-                <span class="legend-text">2-4</span>
+            <div class="legend-item" style="margin-bottom: 5px; display: flex; align-items: center;">
+                <span class="legend-color" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; background-color: #2196F3;"></span>
+                <span class="legend-text" style="font-size: 12px;">2-4</span>
             </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background-color: #FF9800;"></span>
-                <span class="legend-text">4-6</span>
+            <div class="legend-item" style="margin-bottom: 5px; display: flex; align-items: center;">
+                <span class="legend-color" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; background-color: #FF9800;"></span>
+                <span class="legend-text" style="font-size: 12px;">4-6</span>
             </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background-color: #F44336;"></span>
-                <span class="legend-text">6+</span>
+            <div class="legend-item" style="margin-bottom: 5px; display: flex; align-items: center;">
+                <span class="legend-color" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; background-color: #F44336;"></span>
+                <span class="legend-text" style="font-size: 12px;">6+</span>
             </div>
         </div>
-        <div id="loading">Caricamento dati terremoti...</div>
+        <div id="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(255,255,255,0.9); padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.2); z-index: 2000; text-align: center;">Caricamento dati terremoti...</div>
     </div>
+</div>
 
-    <script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
-    <script>
-        // Funzione per mostrare/nascondere il loading
-        function toggleLoading(show) {
-            document.getElementById('loading').style.display = show ? 'block' : 'none';
-        }
+<link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
+<script>
+    // Funzione per mostrare/nascondere il loading
+    function toggleLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
 
-        // Funzione per creare un marker
-        function createMarker(magnitude, lat, lon, time) {
-            const el = document.createElement('div');
-            el.className = 'marker';
-            el.style.width = Math.pow(2, magnitude) * 2 + 'px';
-            el.style.height = Math.pow(2, magnitude) * 2 + 'px';
-            el.style.backgroundColor = magnitude < 2 ? '#4CAF50' : 
-                                     magnitude < 4 ? '#2196F3' : 
-                                     magnitude < 6 ? '#FF9800' : '#F44336';
+    // Funzione per creare un marker
+    function createMarker(magnitude, lat, lon, time) {
+        const el = document.createElement('div');
+        el.className = 'marker';
+        el.style.width = Math.pow(2, magnitude) * 2 + 'px';
+        el.style.height = Math.pow(2, magnitude) * 2 + 'px';
+        el.style.backgroundColor = magnitude < 2 ? '#4CAF50' : 
+                                 magnitude < 4 ? '#2196F3' : 
+                                 magnitude < 6 ? '#FF9800' : '#F44336';
+        el.style.border = '2px solid white';
+        el.style.borderRadius = '50%';
+        el.style.boxShadow = '0 0 5px rgba(0,0,0,0.3)';
+        
+        return new maplibregl.Marker(el)
+            .setLngLat([lon, lat])
+            .setPopup(new maplibregl.Popup().setHTML(`
+                <h3>Terremoto M${magnitude.toFixed(1)}</h3>
+                <p>Data: ${time.toLocaleString()}</p>
+                <p>Coordinate: ${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E</p>
+            `));
+    }
+
+    // Inizializzazione della mappa
+    const map = new maplibregl.Map({
+        container: 'map',
+        style: 'https://api.maptiler.com/maps/topo-v2/style.json?key=HHr81hsSPOHEHC8vzA6f',
+        center: [12, 42],
+        zoom: 5
+    });
+
+    // Carica i terremoti quando la mappa è pronta
+    map.on('load', async () => {
+        try {
+            toggleLoading(true);
+            const response = await fetch('https://webservices.ingv.it/fdsnws/event/1/query?starttime=2024-01-01T00:00:00&endtime=2024-12-31T23:59:59&minmag=0&maxmag=10&orderby=time');
+            if (!response.ok) throw new Error('Errore nel caricamento dei dati');
             
-            return new maplibregl.Marker(el)
-                .setLngLat([lon, lat])
-                .setPopup(new maplibregl.Popup().setHTML(`
-                    <h3>Terremoto M${magnitude.toFixed(1)}</h3>
-                    <p>Data: ${time.toLocaleString()}</p>
-                    <p>Coordinate: ${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E</p>
-                `));
-        }
-
-        // Inizializzazione della mappa
-        const map = new maplibregl.Map({
-            container: 'map',
-            style: 'https://api.maptiler.com/maps/topo-v2/style.json?key=HHr81hsSPOHEHC8vzA6f',
-            center: [12, 42],
-            zoom: 5
-        });
-
-        // Carica i terremoti quando la mappa è pronta
-        map.on('load', async () => {
-            try {
-                toggleLoading(true);
-                const response = await fetch('https://webservices.ingv.it/fdsnws/event/1/query?starttime=2024-01-01T00:00:00&endtime=2024-12-31T23:59:59&minmag=0&maxmag=10&orderby=time');
-                if (!response.ok) throw new Error('Errore nel caricamento dei dati');
-                
-                const data = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(data, "text/xml");
-                const events = xmlDoc.getElementsByTagName("event");
-                
-                for (let event of events) {
-                    try {
-                        const magnitude = parseFloat(event.getElementsByTagName("magnitude")[0].getElementsByTagName("value")[0].textContent);
-                        const lat = parseFloat(event.getElementsByTagName("latitude")[0].textContent);
-                        const lon = parseFloat(event.getElementsByTagName("longitude")[0].textContent);
-                        const time = new Date(event.getElementsByTagName("time")[0].getElementsByTagName("value")[0].textContent);
-                        
-                        createMarker(magnitude, lat, lon, time).addTo(map);
-                    } catch (error) {
-                        console.error('Errore nel processare un evento:', error);
-                        continue;
-                    }
+            const data = await response.text();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(data, "text/xml");
+            const events = xmlDoc.getElementsByTagName("event");
+            
+            for (let event of events) {
+                try {
+                    const magnitude = parseFloat(event.getElementsByTagName("magnitude")[0].getElementsByTagName("value")[0].textContent);
+                    const lat = parseFloat(event.getElementsByTagName("latitude")[0].textContent);
+                    const lon = parseFloat(event.getElementsByTagName("longitude")[0].textContent);
+                    const time = new Date(event.getElementsByTagName("time")[0].getElementsByTagName("value")[0].textContent);
+                    
+                    createMarker(magnitude, lat, lon, time).addTo(map);
+                } catch (error) {
+                    console.error('Errore nel processare un evento:', error);
+                    continue;
                 }
-                toggleLoading(false);
-            } catch (error) {
-                console.error('Errore nel caricamento dei terremoti:', error);
-                document.getElementById('loading').innerHTML = 'Errore nel caricamento dei dati. Ricarica la pagina per riprovare.';
             }
-        });
+            toggleLoading(false);
+        } catch (error) {
+            console.error('Errore nel caricamento dei terremoti:', error);
+            document.getElementById('loading').innerHTML = 'Errore nel caricamento dei dati. Ricarica la pagina per riprovare.';
+        }
+    });
 
-        // Gestione degli errori della mappa
-        map.on('error', (error) => {
-            console.error('Errore della mappa:', error);
-            document.getElementById('loading').innerHTML = 'Errore nel caricamento della mappa. Ricarica la pagina per riprovare.';
-            document.getElementById('loading').style.display = 'block';
-        });
-    </script>
-</body>
-</html> 
+    // Gestione degli errori della mappa
+    map.on('error', (error) => {
+        console.error('Errore della mappa:', error);
+        document.getElementById('loading').innerHTML = 'Errore nel caricamento della mappa. Ricarica la pagina per riprovare.';
+        document.getElementById('loading').style.display = 'block';
+    });
+</script>
+
+<?php
+get_footer();
+?>
